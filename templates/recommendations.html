@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Recommendations</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <main>
+        <div class="px-4 py-3 my-2 text-center">
+            <h1>Book Recommendations</h1>
+        <ul>
+            {% for recommendation in recommendations %}
+            <li>
+                <h3>{{ recommendation.title }}</h3>
+                <p>Author: {{ recommendation.author }}</p>
+                <p>Genre: {{ recommendation.genre }}</p>
+                <p>Rating: {{ recommendation.rating }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+            <a href="/">Back to Home</a>
+        </div>
+    </main>
+</body>
+</html>

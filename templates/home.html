@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Recommender</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+        <main>
+           <div class="">
+               <img class="" src="{{ url_for('static', filename='images/azure-icon.svg') }}" alt="Azure Logo" width="192" height="192"/>
+               <!-- <img  src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
+               <h1 class="display-6 fw-bold text-primary">Dafe's Book Recommender</h1>            
+            </div>
+    
+            <form method="post" action="{{url_for('recommend')}}">
+        
+                <label for="book_title" class="">Could you please enter a book you really enjoy?</label>
+
+                <!-- <p class="lead mb-2">Could you please tell me your name?</p> -->
+                <div class="">
+                    <input type="text" id="bootk_title" class="" name="book_title" style="max-width: 256px;">
+                </div>            
+                <div class="">
+                    <button type="submit" class="" value="Get Recommendations">Say Hello</button>
+                </div>            
+            </form>
+        </main> 
+</body>
+</html>
+
