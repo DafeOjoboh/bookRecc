@@ -72,7 +72,6 @@ if __name__ == '__main__':
 from flask import Flask, request, jsonify
 import pyodbc
 import numpy as np
-from pyspark.ml.recommendation import ALSModel
 import configparser
 
 
