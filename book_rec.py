@@ -75,12 +75,11 @@ def pivot_table(df):
 
 input_data='the fellowship of the ring (the lord of the rings, part 1)'
 LoR_list = [input_data]
+result_list = []
+worst_list = []
 
-def compute_corr(df1, df2, ):
+def compute_corr(df1, df2):
     # for each of the trilogy book compute:
-
-    result_list = []
-    worst_list = []
 
     for LoR_book in LoR_list:
         
@@ -116,3 +115,21 @@ def compute_corr(df1, df2, ):
 print("Correlation for book:", LoR_list[0])
 #print("Average rating of LOR:", ratings_data_raw[ratings_data_raw['Book-Title']=='the fellowship of the ring (the lord of the rings, part 1'].groupby(ratings_data_raw['Book-Title']).mean()))
 rslt = result_list[0]
+
+
+
+ratings_df = load_data('Downloads/BX-Book-rating.csv')
+books_df = load_data('Downloads/BX-Books.csv')
+mergeColumm = "ISBN"
+threshold = 8
+input_book = "the fellowship of the ring (the lord of the rings, part 1)"
+dataset = merge_dataset(ratings_df, books_df, mergeColumm)
+dataset = get_books_of_tolkien_readers(dataset, input_book)
+
+ratings_data_raw = books_above_threshold(dataset, threshold)
+dataset_for_corr = pivot_table(ratings_data_raw)
+
+top10, bottom10 = compute_corr(dataset_for_corr, ratings_data_raw)
+
+
+

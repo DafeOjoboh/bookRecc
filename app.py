@@ -1,78 +1,8 @@
-"""
-from flask import Flask, render_template, request, jsonify
-import requests
-
-app = Flask(__name__)
-
-# Define the base URL of your backend application
-BACKEND_BASE_URL = '<your-backend-base-url>'
-
-# Define the home page route
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-# Define the recommendation route
-@app.route('/recommend', methods=['POST'])
-def recommend():
-    book_title = request.form['book_title']
-    # Send request to backend application for recommendations
-    response = requests.post(f'{BACKEND_BASE_URL}/recommend', json={'book_title': book_title})
-    recommendations = response.json()['recommendations']
-    return render_template('recommendations.html', recommendations=recommendations)
-
-if __name__ == '__main__':
-    app.run(debug=True)
-"""
-
-"""
-import os
-
-from flask import (Flask, redirect, render_template, request,
-                   send_from_directory, url_for)
-
-app = Flask(__name__)
-
-
-@app.route('/')
-def index():
-   print('Request for index page received')
-   return render_template('home.html')
-"""
-"""
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
-"""
-"""
-@app.route('/recommend', methods=['POST'])
-def recommend():
-   book_title = request.form.get('book_title')
-
-   book_title = request.form['book_title']
-    # Send request to backend application for recommendations
-    #response = request.post(f'{BACKEND_BASE_URL}/recommend', json={'book_title': book_title})
-   recommendations = response.json()['recommendations']
-   return render_template('recommendations.html', recommendations=recommendations)
-
-
-   if name:
-       print('Request for hello page received with name=%s' % name)
-       return render_template('recommendations.html', name = name)
-   else:
-       print('Request for hello page received with no name or blank name -- redirecting')
-       return redirect(url_for('index'))
-
-
-if __name__ == '__main__':
-   app.run()
-
-   """
 from flask import Flask, request, jsonify
 import pyodbc
 import numpy as np
 import configparser
+from book_rec import load_data, merge_dataset, get_books_of_tolkien_readers, books_above_threshold, pivot_table, compute_corr
 
 
 # Set config parameters for Azure SQL Database
@@ -89,7 +19,7 @@ cnxn = pyodbc.connect(conn_str)
 cursor = cnxn.cursor()
 
 # Load the trained ALS model
-als_model = ALSModel.load('<path-to-your-als-model>')
+#als_model = ALSModel.load('<path-to-your-als-model>')
 
 # Fetch book metadata from SQL Database
 def fetch_book_metadata(book_title):
@@ -106,16 +36,16 @@ def fetch_book_metadata(book_title):
     return book_metadata
 
 # Generate book recommendations
-def generate_recommendations(book_title, book_metadata, als_model):
+def generate_recommendations(recommendations):
     # Fetch book metadata from SQL Database
-    book_metadata = fetch_book_metadata(book_title)
+    #book_metadata = fetch_book_metadata(book_title)
     
     # Convert book metadata to Spark DataFrame
-    book_df = spark.createDataFrame(book_metadata)
+    #book_df = spark.createDataFrame(book_metadata)
 
     # Use the trained ALS model to generate recommendations
-    user_id = 0  # Assuming a single user
-    recommendations = als_model.recommendForUserSubset(book_df, user_id).collect()[0].recommendations
+    #user_id = 0  # Assuming a single user
+    #recommendations = als_model.recommendForUserSubset(book_df, user_id).collect()[0].recommendations
 
     # Extract relevant information from recommendations
     recommended_books = []
@@ -135,10 +65,27 @@ app = Flask(__name__)
 # Update the '/recommend' route to generate book recommendations
 @app.route('/recommend', methods=['POST'])
 def recommend_books():
+    
     book_title = request.json['book_title']
-    book_metadata = fetch_book_metadata(book_title)
-    recommendations = generate_recommendations(book_title, book_metadata, als_model)
+    
+    ratings_df = load_data('Downloads/BX-Book-rating.csv')  
+    books_df = load_data('Downloads/BX-Books.csv')
+    mergeColumm = "ISBN"
+    threshold = 8
+    input_book = book_title
+    dataset = merge_dataset(ratings_df, books_df, mergeColumm)
+    dataset = get_books_of_tolkien_readers(dataset, input_book)
+
+    ratings_data_raw = books_above_threshold(dataset, threshold)
+    dataset_for_corr = pivot_table(ratings_data_raw)
+
+    top10, bottom10 = compute_corr(dataset_for_corr, ratings_data_raw)
+    recommendations = generate_recommendations(top10)
     return jsonify({'recommendations': recommendations})
+
+    #book_metadata = fetch_book_metadata(book_title)
+    #recommendations = generate_recommendations(book_title, book_metadata, als_model)
+    #return jsonify({'recommendations': recommendations})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
